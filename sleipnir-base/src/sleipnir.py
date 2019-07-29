@@ -76,7 +76,7 @@ class WindowMain(QtGui.QMainWindow):
       self.stop_camera_wait = False
 
       # Distance
-      self.distance = 100
+      self.distance = 200
 
       self.run_tell_speed_timestamp = 0
       self.run_tell_speed = 0

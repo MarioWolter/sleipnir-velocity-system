@@ -37,7 +37,7 @@ class Video:
       self.start_timestamp = 0
 
       # Ground level, no motion track below this
-      self.groundlevel = 400
+      self.groundlevel = 100
 
       self.last_motion_view_frame = 0
 
@@ -319,12 +319,15 @@ class FrameProcessingWorker(QtCore.QThread):
             time.sleep(0.001)
             continue
 
+         print "running"
+
          image = None
          image_gray_cv = self.image_cv
          image_blur_cv = cv.GaussianBlur(image_gray_cv, (13, 13), 0)
          found_motion = False
 
          if self.comparison_image_cv is not None:
+            #print "before cv if comparison not none"
 
             frame_delta = cv.absdiff(self.comparison_image_cv, image_blur_cv)
             threshold = cv.threshold(frame_delta, 2, 255, cv.THRESH_BINARY)[1]
@@ -335,6 +338,7 @@ class FrameProcessingWorker(QtCore.QThread):
             #DEBUG  MOTION TRACK
 #            if len(self.motion_boxes[self.current_frame_number]) > 30:
             if False:
+               #print "false from cv contours"
                if (self.video.direction == 0):
                   found_motion = True
                   self.video.direction = 90*6
@@ -344,20 +348,23 @@ class FrameProcessingWorker(QtCore.QThread):
                   (x, y, w, h) = cv.boundingRect(c)
 
                   # Set ground level
-                  if y > self.video.groundlevel:
-                     continue
+                  #if y > self.video.groundlevel:
+                  #   continue
 
 
-                  if cv.contourArea(c) < 15:
-                     continue
-                  if cv.contourArea(c) > 10000:
-                     continue
+                  #if cv.contourArea(c) < 15:
+                  #   continue
+                  #if cv.contourArea(c) > 10000:
+                  #   continue
                   if x < 160 and x + w > 160:
                      found_motion = True
+
+                  print "before rectangle"
 
                   cv.rectangle(image_gray_cv, (x - 2, y - 2), (x + w + 4, y + h + 4), (0, 0, 0), 2)
 
                   if found_motion and self.current_frame_number > 4 and self.video.direction == 0:
+                     print "found motion and other if"
                      # Check previous motion boxes
                      direction = self.check_overlap_previous(x, y, w, h, x, w, self.current_frame_number - 1, 10)
 
@@ -366,17 +373,22 @@ class FrameProcessingWorker(QtCore.QThread):
 #                        print self.video.direction
 
                      if (self.video.direction != 0):
+                        print "found motion true 1"
                         found_motion = True
                         break
                      else:
+                        print "found motion false 1"
                         found_motion = False
                   else:
                      found_motion = False
+                     print "found motion false 2"
 
          self.comparison_image_cv = image_blur_cv
          self.image = image_gray_cv
          self.found_motion = found_motion
          self.found_motion_frame_number = self.current_frame_number
+
+        # print "end of processing"
 
 #         time.sleep(0.4)
          # Close processing
@@ -389,28 +401,28 @@ class FrameProcessingWorker(QtCore.QThread):
       for c2 in self.motion_boxes[frame_number]:
          (x2, y2, w2, h2) = cv.boundingRect(c2)
 
-         if cv.contourArea(c2) < 15:
-            continue
-         if cv.contourArea(c2) > 10000:
-            continue
+         #if cv.contourArea(c2) < 15:
+         #   continue
+         #if cv.contourArea(c2) > 10000:
+         #   continue
 
          if x == x2 and y == y2 and w == w2 and h == h2 :
             continue
 
          # Sanity on size
-         if w < 5 or h < 5 or w > 100 or h > 100:
-            continue
+         #if w < 1 or h < 1 or w > 100 or h > 100:
+         #   continue
 
          # the sizes of the boxes can't be too far off
          d1 = float(w * h)
          d2 = float(w2 * h2)
          diff = min(d1, d2) / max(d1, d2)
-         if diff < 0.3:
-            continue
+         #if diff < 0.3:
+         #   continue
  #        print "size diff: " + str(diff)
  
-         if (self.overlap_box(x, y, w, h, x2, y2, w2, h2) == 0):
-            continue
+         #if (self.overlap_box(x, y, w, h, x2, y2, w2, h2) == 0):
+         #   continue
 
          # if iterations is zero or object is coming to close to the side
          if iterations == 0 or x2 < 20 or x2 + w2 > 300:
