@@ -53,7 +53,7 @@ class WindowMain(QtGui.QMainWindow):
       self.run_frame_number_cam2 = None
       # time to abort run
       self.run_abort_timestamp = 0
-      self.max_time_run = 6000
+      self.max_time_run = 10000
 
       # Camera 1/2 online
       self.online_cam1 = False
