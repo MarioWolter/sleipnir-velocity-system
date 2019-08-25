@@ -37,7 +37,7 @@ class Video:
       self.start_timestamp = 0
 
       # Ground level, no motion track below this
-      self.groundlevel = 100
+      self.groundlevel = 1
 
       self.last_motion_view_frame = 0
 
